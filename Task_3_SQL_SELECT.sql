@@ -1,21 +1,21 @@
---количество исполнителей в каждом жанре
+--РєРѕР»РёС‡РµСЃС‚РІРѕ РёСЃРїРѕР»РЅРёС‚РµР»РµР№ РІ РєР°Р¶РґРѕРј Р¶Р°РЅСЂРµ
 SELECT g.name, COUNT(performer_id) p_count FROM genres_performers gp
 LEFT JOIN genres g ON g.genre_id = gp.genre_id
 GROUP BY g.name
 ORDER BY p_count DESC;
 
---количество треков, вошедших в альбомы 2019-2020 годов
+--РєРѕР»РёС‡РµСЃС‚РІРѕ С‚СЂРµРєРѕРІ, РІРѕС€РµРґС€РёС… РІ Р°Р»СЊР±РѕРјС‹ 2019-2020 РіРѕРґРѕРІ
 SELECT COUNT(track_id) t_count FROM tracks t
 LEFT JOIN albums a ON a.album_id = t.album_id
 WHERE a.album_year BETWEEN 2019 AND 2020;
 
---средняя продолжительность треков по каждому альбому;
+--Г±Г°ГҐГ¤Г­ГїГї ГЇГ°Г®Г¤Г®Г«Г¦ГЁГІГҐГ«ГјГ­Г®Г±ГІГј ГІГ°ГҐГЄГ®Гў ГЇГ® ГЄГ Г¦Г¤Г®Г¬Гі Г Г«ГјГЎГ®Г¬Гі;
 SELECT a.name, AVG(t.duration) avg_duration FROM albums a
 LEFT JOIN tracks t ON a.album_id = t.album_id
 GROUP BY a.name 
 ORDER BY avg_duration DESC;
 
---все исполнители, которые не выпустили альбомы в 2020 году
+--ГўГ±ГҐ ГЁГ±ГЇГ®Г«Г­ГЁГІГҐГ«ГЁ, ГЄГ®ГІГ®Г°Г»ГҐ Г­ГҐ ГўГ»ГЇГіГ±ГІГЁГ«ГЁ Г Г«ГјГЎГ®Г¬Г» Гў 2020 ГЈГ®Г¤Гі
 SELECT p.name FROM performers p
 LEFT JOIN performers_albums pa ON p.performer_id = pa.performer_id
 JOIN albums a ON a.album_id = pa.album_id
@@ -24,16 +24,16 @@ WHERE p.name NOT IN (SELECT p.name FROM performers p LEFT
 		     JOIN albums a ON a.album_id = pa.album_id WHERE a.album_year = 2020)
 GROUP BY p.name;
 
---названия сборников, в которых присутствует конкретный исполнитель (Дмитрий Маликов)
+--Г­Г Г§ГўГ Г­ГЁГї Г±ГЎГ®Г°Г­ГЁГЄГ®Гў, Гў ГЄГ®ГІГ®Г°Г»Гµ ГЇГ°ГЁГ±ГіГІГ±ГІГўГіГҐГІ ГЄГ®Г­ГЄГ°ГҐГІГ­Г»Г© ГЁГ±ГЇГ®Г«Г­ГЁГІГҐГ«Гј (Г„Г¬ГЁГІГ°ГЁГ© ГЊГ Г«ГЁГЄГ®Гў)
 SELECT c.name FROM collections c
 JOIN tracks_collections tc ON tc.collection_id = c.collection_id
 JOIN tracks t ON t.track_id = tc.track_id
 JOIN albums a ON a.album_id = t.album_id
 JOIN performers_albums pa ON pa.album_id = a.album_id
 JOIN performers p ON p.performer_id = pa.performer_id
-WHERE p.name = 'Дмитрий Маликов';
+WHERE p.name = 'Г„Г¬ГЁГІГ°ГЁГ© ГЊГ Г«ГЁГЄГ®Гў';
 
---название альбомов, в которых присутствуют исполнители более 1 жанра
+--Г­Г Г§ГўГ Г­ГЁГҐ Г Г«ГјГЎГ®Г¬Г®Гў, Гў ГЄГ®ГІГ®Г°Г»Гµ ГЇГ°ГЁГ±ГіГІГ±ГІГўГіГѕГІ ГЁГ±ГЇГ®Г«Г­ГЁГІГҐГ«ГЁ ГЎГ®Г«ГҐГҐ 1 Г¦Г Г­Г°Г 
 SELECT a.name, COUNT(gp.genre_id) FROM albums a 
 JOIN performers_albums pa ON pa.album_id = a.album_id
 JOIN performers p ON p.performer_id = pa.performer_id
@@ -41,18 +41,18 @@ JOIN genres_performers gp ON gp.performer_id = p.performer_id
 GROUP BY a.name
 HAVING COUNT(gp.genre_id)>1;
 
---наименование треков, которые не входят в сборники
+--Г­Г ГЁГ¬ГҐГ­Г®ГўГ Г­ГЁГҐ ГІГ°ГҐГЄГ®Гў, ГЄГ®ГІГ®Г°Г»ГҐ Г­ГҐ ГўГµГ®Г¤ГїГІ Гў Г±ГЎГ®Г°Г­ГЁГЄГЁ
 SELECT t.name, tc.collection_id FROM tracks t 
 LEFT JOIN tracks_collections tc ON tc.track_id = t.track_id 
 WHERE tc.collection_id IS NULL;
 
---исполнителя(-ей), написавшего самый короткий по продолжительности трек (теоретически таких треков может быть несколько);
+--ГЁГ±ГЇГ®Г«Г­ГЁГІГҐГ«Гї(-ГҐГ©), Г­Г ГЇГЁГ±Г ГўГёГҐГЈГ® Г±Г Г¬Г»Г© ГЄГ®Г°Г®ГІГЄГЁГ© ГЇГ® ГЇГ°Г®Г¤Г®Г«Г¦ГЁГІГҐГ«ГјГ­Г®Г±ГІГЁ ГІГ°ГҐГЄ (ГІГҐГ®Г°ГҐГІГЁГ·ГҐГ±ГЄГЁ ГІГ ГЄГЁГµ ГІГ°ГҐГЄГ®Гў Г¬Г®Г¦ГҐГІ ГЎГ»ГІГј Г­ГҐГ±ГЄГ®Г«ГјГЄГ®);
 SELECT p.name FROM performers p
 JOIN performers_albums pa ON p.performer_id = pa.performer_id
 JOIN tracks t ON pa.album_id = t.album_id
 WHERE t.duration = (SELECT MIN(t.duration) FROM tracks t);
 
---название альбомов, содержащих наименьшее количество треков
+--Г­Г Г§ГўГ Г­ГЁГҐ Г Г«ГјГЎГ®Г¬Г®Гў, Г±Г®Г¤ГҐГ°Г¦Г Г№ГЁГµ Г­Г ГЁГ¬ГҐГ­ГјГёГҐГҐ ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГІГ°ГҐГЄГ®Гў
 SELECT a.name, COUNT(*) t_count FROM albums a 
 LEFT JOIN tracks t ON a.album_id = t.album_id 
 GROUP BY a.name 
